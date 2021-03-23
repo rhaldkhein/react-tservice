@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-interface IPair<T> { value: T; error: Error | undefined; }
+interface IPair<T> { value: T | undefined; error: Error | undefined; }
 type SubscribeFunc<T> = (value: IPair<T>) => void;
 type CleanFunc = () => void;
 
@@ -77,15 +77,17 @@ export function createObservable<T>(
 /**
  * Hook to observe an observable and export its value.
  * This will also trigger update to the component.
- * @param ob Observable
+ * @param observable Observable
+ * @param defaultValue Default value if observable is null or undefined
  */
 export function useObservable<T>(
-  ob: Observable<T>):
+  observable: Observable<T> | null | undefined,
+  defaultValue?: T):
   IPair<T> {
 
+  observable = observable || undefined;
   const [state, setState] = useState<IPair<T>>(
-    { value: ob.value, error: ob.error });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => ob.subscribe(setState), []);
+    { value: observable?.value || defaultValue, error: observable?.error });
+  useEffect(() => observable?.subscribe(setState) || undefined, [observable]);
   return state;
 }
